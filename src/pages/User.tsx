@@ -9,6 +9,7 @@ export interface IAppState {
 export default class App extends React.Component<IAppProps, IAppState> {
   constructor(props: IAppProps) {
     super(props);
+
     this.state = {
     }
   }
@@ -16,7 +17,7 @@ export default class App extends React.Component<IAppProps, IAppState> {
   public render() {
     return (
       <div>
-            INFO
+        MyUser
       </div>
     );
   }
