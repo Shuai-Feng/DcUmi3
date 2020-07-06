@@ -23,7 +23,9 @@
     "@ant-design/pro-layout": "^5.0.12",
     "@umijs/preset-react": "1.x",
     "@umijs/test": "^3.2.7",
-    "antd": "3.24.16",
+    "antd": "3.26.16",
+    "axios": "^0.19.2",
+    "jsonp": "^0.2.1",
     "less-loader": "5",
     "lint-staged": "^10.0.7",
     "prettier": "^1.19.1",
@@ -33,6 +35,7 @@
     "yorkie": "^2.0.0"
   },
   "devDependencies": {
+    "@types/jsonp": "^0.2.0",
     "less": "^3.11.3"
   }
 }

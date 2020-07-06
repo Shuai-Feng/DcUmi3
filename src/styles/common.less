@@ -1,45 +1,52 @@
-
 //顶部导航条
-.header{
-    background-color: #fff;
-    .header-top{
-        height: 60px;
-        line-height: 60px;
-        padding: 0 20px;
-        text-align: right;
-        a{
-            margin-left: 40px;
-        }
+.header {
+  background-color: #fff;
+  .header-top {
+    height: 60px;
+    line-height: 60px;
+    padding: 0 20px;
+    text-align: right;
+    a {
+      margin-left: 40px;
     }
-    .breadcrumb{
-        height: 40px;
-        padding: 0 50px;
-        line-height: 40px;
-        border-top: 1px solid #09f;
-        .breadcrumb-title{
-            text-align: center;
-            font-size: 18px ;
-            &::after{
-                position: absolute;
-                top: 39px;
-                left: 87px;
-                content: '';
-                border-top: 10px solid #FFF;
-                border-left: 12px solid transparent;
-                border-right: 12px solid transparent;
-            }
-        }
+  }
+  .breadcrumb {
+    height: 40px;
+    padding: 0 50px;
+    line-height: 40px;
+    border-top: 1px solid #09f;
+    .breadcrumb-title {
+      text-align: center;
+      font-size: 18px;
+      &::after {
+        position: absolute;
+        top: 39px;
+        left: 87px;
+        content: '';
+        border-top: 10px solid #fff;
+        border-left: 12px solid transparent;
+        border-right: 12px solid transparent;
+      }
     }
+    .weather {
+      text-align: right;
+      img {
+        height: 20px;
+        margin: 0px 10px 0px;
+        vertical-align: middle;
+      }
+    }
+  }
 }
 
-.main{
-    height: calc(100vh);
-    overflow: auto;
+.main {
+  height: calc(100vh);
+  overflow: auto;
 }
 
-.footer{
-    height:100px;
-    line-height: 100px;
-    text-align: center;
-    color: #ccc;
+.footer {
+  height: 100px;
+  line-height: 100px;
+  text-align: center;
+  color: #ccc;
 }
