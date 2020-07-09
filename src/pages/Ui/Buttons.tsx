@@ -22,6 +22,7 @@ export default class App extends React.Component<IAppProps, IAppState> {
       size: e.target.value,
     });
   };
+
   public render() {
     let { loading } = this.state;
     return (

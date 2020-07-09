@@ -37,9 +37,7 @@ export default class App extends React.Component<IAppProps, IAppState> {
   //     }
   //     return result;
   // }
-  fsPromise() {
-    fs.readFile;
-  }
+
   public render() {
     return <div>MyUser</div>;
   }
