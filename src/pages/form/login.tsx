@@ -45,7 +45,7 @@ class Login extends React.Component<IAppProps, IAppState> {
                 initialValue: '',
                 rules: [
                   {
-                    require: true,
+                    required: true,
                     message: '用户名不能为空',
                   },
                 ],
@@ -56,7 +56,7 @@ class Login extends React.Component<IAppProps, IAppState> {
                 initialValue: '',
                 rules: [
                   {
-                    require: true,
+                    required: true,
                     message: '用户名不能为空',
                   },
                 ],
