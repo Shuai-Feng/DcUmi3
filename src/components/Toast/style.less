@@ -1,0 +1,27 @@
+.ToastWrapper {
+  display: inline-block;
+
+  position: fixed;
+  z-index: 9999;
+  bottom: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  border-radius: 1em;
+  padding: 5px 10px;
+
+  color: #fff;
+  visibility: show;
+  background-color: #525252;
+
+  //shadow
+  box-shadow: 3px 3px 10px #999, -3px 3px 10px #999;
+  transition: 0.3s ease-in-out;
+}
+.ToastWrapper-show {
+  opacity: 1;
+}
+.ToastWrapper-hide {
+  opacity: 0;
+  visibility: hidden;
+}
