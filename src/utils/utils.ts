@@ -14,4 +14,18 @@ export default {
       (date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds())
     );
   },
+  pagination(data: any, callback: any) {
+    return {
+      onChange: (current: any) => {
+        callback(current);
+      },
+      current: data.result.page,
+      pageSize: data.result.page_size,
+      total: data.result.total_count,
+      showTotal: () => {
+        return `共有${data.result.total_count}条`;
+      },
+      showQuickJumper: true,
+    };
+  },
 };

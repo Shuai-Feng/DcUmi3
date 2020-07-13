@@ -6,28 +6,46 @@ import NavLeft from '@/components/NavLeft';
 import NavHeader from '@/components/Header';
 
 import '@/styles/common.less';
+import '@/styles/loading.less';
+
 const { Content, Sider } = Layout;
 
 interface IAppProps {}
 
 const App: React.FunctionComponent<IAppProps> = props => {
   return (
-    <Layout>
-      <Sider breakpoint="lg" collapsedWidth={0} width={260}>
-        {/* 这里放menu组件 */}
-        <NavLeft className="navLeft"></NavLeft>
-      </Sider>
+    <div>
+      <Layout>
+        <Sider breakpoint="lg" collapsedWidth={0} width={260}>
+          {/* 这里放menu组件 */}
+          <NavLeft className="navLeft"></NavLeft>
+        </Sider>
 
-      <Layout className="main">
-        <div className="header">
-          <NavHeader />
-        </div>
-        <Content style={{ margin: '24px 16px 0' }}>{props.children}</Content>
-        <div className="footer">
-          created by shuaifeng（推荐使用谷歌浏览器，可以获得更佳操作页面体验）
-        </div>
+        <Layout className="main">
+          <div className="header">
+            <NavHeader />
+          </div>
+          <Content style={{ margin: '24px 16px 0' }}>{props.children}</Content>
+          <div className="footer">
+            created by shuaifeng（推荐使用谷歌浏览器，可以获得更佳操作页面体验）
+          </div>
+        </Layout>
       </Layout>
-    </Layout>
+      <div
+        className="ajax-loading"
+        id="ajaxLoading"
+        style={{ display: 'none' }}
+      >
+        <div className="overlay"></div>
+        <div className="loading">
+          <img
+            src="https://media.number-7.cn/ebike-h5/static/images/common/loading.gif"
+            alt=""
+          />
+          <span>加载中，请稍后...</span>
+        </div>
+      </div>
+    </div>
   );
 };
 

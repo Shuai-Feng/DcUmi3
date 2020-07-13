@@ -23,23 +23,22 @@ export default class App extends React.Component<IAppProps, IAppState> {
     };
   }
 
-  handleOpen(type: string) {
+  handleOpen(type: any) {
     // this.setState({
     //     [type]:true
     // });
   }
-  handleConfirm<T>(type: T) {
-    //Modal.success Modal.error
-    // Modal[type]({
-    //     title:'确认？',
-    //     content:'你确定你学会了React了吗？',
-    //     onOk(){
-    //         console.log('Ok')
-    //     },
-    //     onCancel(){
-    //         console.log('Cancel')
-    //     }
-    // })
+  handleConfirm(type: any) {
+    Modal[type]({
+      title: '确认？',
+      content: '你确定你学会了React了吗？',
+      onOk() {
+        console.log('Ok');
+      },
+      onCancel() {
+        console.log('Cancel');
+      },
+    });
   }
   public render() {
     return (
