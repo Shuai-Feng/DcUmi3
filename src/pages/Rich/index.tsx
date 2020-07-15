@@ -44,6 +44,7 @@ export default class App extends React.Component<IAppProps, IAppState> {
       editorState: '',
     });
   };
+
   public render() {
     const { editorState } = this.state;
     let darftText: RawDraftContentState = this.state.editorContent;

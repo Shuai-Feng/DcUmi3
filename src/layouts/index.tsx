@@ -25,10 +25,13 @@ const App: React.FunctionComponent<IAppProps> = props => {
           <div className="header">
             <NavHeader />
           </div>
-          <Content style={{ margin: '24px 16px 0' }}>{props.children}</Content>
-          <div className="footer">
-            created by shuaifeng（推荐使用谷歌浏览器，可以获得更佳操作页面体验）
-          </div>
+          <Content style={{ margin: '24px 16px 0' }}>
+            {props.children}
+            <div className="footer">
+              created by
+              shuaifeng（推荐使用谷歌浏览器，可以获得更佳操作页面体验）
+            </div>
+          </Content>
         </Layout>
       </Layout>
       <div

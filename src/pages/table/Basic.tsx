@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Card, Table, Modal } from 'antd';
-import Utils from '@/utils/utils';
+import Utils from '@/utils';
 
 //用于防止Table组件报错
 import { RowSelectionType } from 'antd/lib/table/interface';

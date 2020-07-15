@@ -1,3 +1,6 @@
+import React from 'react';
+import { Button, Select } from 'antd';
+const Option = Select.Option;
 export default {
   formateData(time: number): string {
     if (!time) return '';
@@ -27,5 +30,20 @@ export default {
       },
       showQuickJumper: true,
     };
+  },
+  getOptionList(data: Array<any>) {
+    if (!data) {
+      return [];
+    }
+    let options: Array<any> = []; //[<Option value="0" key="all_key">全部</Option>];
+    data.map((item: any) => {
+      options.push(
+        <Option value={item.id} key={item.id}>
+          {item.name}
+        </Option>,
+      );
+    });
+    return options;
+    //我想在数组中加入一个antd 的Option 但是不知道怎么的.ts文件识别不了
   },
 };

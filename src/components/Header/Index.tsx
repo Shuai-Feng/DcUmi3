@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Row, Col } from 'antd';
 import { Link } from 'umi';
 
-import Utils from '@/utils/utils';
+import Utils from '@/utils';
 import axios from '@/axios';
 export interface IAppProps {}
 
