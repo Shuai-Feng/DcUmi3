@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Button, Select, Input } from 'antd';
+import { Form, Button, Select, Input, DatePicker } from 'antd';
 import { FormComponentProps } from 'antd/es/form';
 import Utils from '@/utils/index';
 
@@ -30,12 +30,12 @@ class FilterForm extends React.Component<IProps, {}> {
     const formItemList: Array<any> = [];
     if (formList && formList.length > 0) {
       formList.forEach((item: any, i: number) => {
-        let label: string = item.label;
+        let label: any = item.label;
         let field: string = item.field;
-        let initialValue: string | number = item.initialValue || '';
-        let placeholder: string | '' = item.placeholder;
-        let width = item.width;
-        if (item.type == 'SELECT') {
+        let initialValue: any = item.initialValue || '';
+        let placeholder: any = item.placeholder;
+        let width: any = item.width;
+        if (item.type === 'SELECT') {
           const SELECT = (
             <FormItem label={label} key={field}>
               {getFieldDecorator(field, {
@@ -48,7 +48,7 @@ class FilterForm extends React.Component<IProps, {}> {
             </FormItem>
           );
           formItemList.push(SELECT);
-        } else if ((item.type = 'INPUT')) {
+        } else if (item.type === 'INPUT') {
           const INPUT = (
             <FormItem label={label} key={field}>
               {getFieldDecorator(field, {
@@ -56,6 +56,32 @@ class FilterForm extends React.Component<IProps, {}> {
               })(<Input type="text" placeholder={placeholder} />)}
             </FormItem>
           );
+          formItemList.push(INPUT);
+        } else if (item.type === 'TIME') {
+          const begin_time = (
+            <FormItem label="订单时间" key="begin_time">
+              {getFieldDecorator('begin_time')(
+                <DatePicker
+                  showTime={true}
+                  placeholder={placeholder}
+                  format="YYYY-MM-DD HH:mm:ss"
+                />,
+              )}
+            </FormItem>
+          );
+          formItemList.push(begin_time);
+          const end_time = (
+            <FormItem label="~" colon={false} key="end_time">
+              {getFieldDecorator('end_time')(
+                <DatePicker
+                  showTime={true}
+                  placeholder={placeholder}
+                  format="YYYY-MM-DD HH:mm:ss"
+                />,
+              )}
+            </FormItem>
+          );
+          formItemList.push(end_time);
         }
       });
     }
@@ -84,4 +110,4 @@ class FilterForm extends React.Component<IProps, {}> {
     );
   }
 }
-export default Form.create<IProps>()(FilterForm);
+export default Form.create<IProps>({})(FilterForm);

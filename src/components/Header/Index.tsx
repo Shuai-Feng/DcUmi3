@@ -4,7 +4,11 @@ import { Link } from 'umi';
 
 import Utils from '@/utils';
 import axios from '@/axios';
-export interface IAppProps {}
+import './index.less';
+
+export interface IAppProps {
+  menuType?: string;
+}
 
 export interface IAppState {
   userName: string;
@@ -60,24 +64,39 @@ export default class App extends React.Component<IAppProps, IAppState> {
   public render() {
     let { userName, routeName, sysTime } = this.state;
     let { dayPictureUrl, weather } = this.state;
+    let { menuType } = this.props;
     return (
-      <div>
+      <div className="header">
         <Row className="header-top">
-          <span>欢迎您，{userName}</span>
-          <Link to="/">退出</Link>
-        </Row>
-        <Row className="breadcrumb">
-          <Col span={4} className="breadcrumb-title">
-            {routeName}
-          </Col>
-          <Col span={20} className="weather">
-            <span>{sysTime}</span>
-            <span>
-              <img src={dayPictureUrl} alt="" />
-            </span>
-            <span className="weather">{weather}</span>
+          {menuType ? (
+            <Col span={6} className="logo">
+              <img src="/assets/logo-ant.svg" alt=""></img>
+              <span>IMoc 通用管理系统</span>
+            </Col>
+          ) : (
+            ''
+          )}
+          <Col span={menuType ? 18 : 24}>
+            <span>欢迎您，{userName}</span>
+            <Link to="/">退出</Link>
           </Col>
         </Row>
+        {menuType ? (
+          ''
+        ) : (
+          <Row className="breadcrumb">
+            <Col span={4} className="breadcrumb-title">
+              {routeName}
+            </Col>
+            <Col span={20} className="weather">
+              <span>{sysTime}</span>
+              <span>
+                <img src={dayPictureUrl} alt="" />
+              </span>
+              <span className="weather">{weather}</span>
+            </Col>
+          </Row>
+        )}
       </div>
     );
   }
