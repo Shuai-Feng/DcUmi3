@@ -63,9 +63,40 @@ export default class App extends React.Component<IAppProps, IAppState> {
     };
     return option;
   }
+  getOption3 = (): EChartOption => {
+    return {
+      title: {
+        text: '某市0 和 1 统计',
+        top: '10px',
+        left: '10px',
+      },
+      xAxis: {
+        data: ['0(受)', '1(攻)'],
+      },
+      yAxis: {
+        type: 'value',
+      },
+      series: [
+        {
+          type: 'bar',
+          data: [10, 0],
+        },
+      ],
+    };
+  };
   public render() {
     return (
       <div>
+        <Card title="柱形图表之三">
+          <ReactEcharts
+            option={this.getOption3()}
+            style={{ height: 400 }}
+            theme="dark"
+          />
+        </Card>
+        <Card title="柱形图表之二">
+          <ReactEcharts option={this.getOption2()} />
+        </Card>
         <Card title="柱形图表之一">
           <ReactEcharts
             option={this.getOption()}
@@ -74,9 +105,6 @@ export default class App extends React.Component<IAppProps, IAppState> {
             lazyUpdate={true}
             style={{ height: 500 }}
           />
-        </Card>
-        <Card title="柱形图表之二">
-          <ReactEcharts option={this.getOption2()} />
         </Card>
       </div>
     );
