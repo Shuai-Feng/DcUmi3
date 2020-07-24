@@ -31,7 +31,6 @@ export default class App extends React.Component<IAppProps, IAppState> {
     pagination: {},
   };
   onRowClick = (record: any, index: any) => {
-    ``;
     let selectKey: any = [index];
     Modal.info({
       title: '信息',

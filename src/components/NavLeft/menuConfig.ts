@@ -121,23 +121,23 @@ const menuList = [
     title: '权限设置',
     key: '/permission',
   },
-  // , {
-  //     title: '其他部分',
-  //     key: '/elseWhere',
-  //     children: [
-  //         {
-  //             title: 'demo1',
-  //             key: '/elseWhere/demo1'
-  //         },
-  //         {
-  //             title: 'demo1',
-  //             key: '/elseWhere/demo2'
-  //         },
-  //         {
-  //             title: '折线图',
-  //             key: '/elseWhere/demo3'
-  //         },
-  //     ]
-  // }
+  {
+    title: '其他部分',
+    key: '/elseWhere',
+    children: [
+      {
+        title: 'demo1',
+        key: '/elseWhere/demo1',
+      },
+      {
+        title: 'demo1',
+        key: '/elseWhere/demo2',
+      },
+      {
+        title: '折线图',
+        key: '/elseWhere/demo3',
+      },
+    ],
+  },
 ];
 export default menuList;

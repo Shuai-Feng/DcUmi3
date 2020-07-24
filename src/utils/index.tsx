@@ -46,4 +46,24 @@ export default {
     return options;
     //我想在数组中加入一个antd 的Option 但是不知道怎么的.ts文件识别不了
   },
+  updateSeletedItem(
+    selectedRowKeys?: any,
+    selectedRows?: any,
+    selectedIds?: any,
+  ) {
+    if (selectedIds) {
+      //@ts-ignore
+      this.setState({
+        selectedRowKeys,
+        selectedIds: selectedIds,
+        selectedItem: selectedRows,
+      });
+    } else {
+      //@ts-ignore
+      this.setState({
+        selectedRowKeys,
+        selectedItem: selectedRows,
+      });
+    }
+  },
 };

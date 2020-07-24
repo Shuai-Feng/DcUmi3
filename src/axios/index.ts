@@ -12,8 +12,12 @@ export default class Axios {
           param: 'callback',
         },
         function(err: any, response: any) {
-          if (response.status == 'success') {
-            resolve(response);
+          if (response) {
+            if (response.status && response.status === 'success') {
+              resolve(response);
+            } else {
+              reject(err.messsage);
+            }
           } else {
             reject(err.messsage);
           }
