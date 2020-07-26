@@ -88,7 +88,7 @@ class FilterForm extends React.Component<IProps, {}> {
     return formItemList;
   };
   render() {
-    let { layout } = this.props;
+    let layout: any = this.props.layout || 'inline';
     return (
       <Form layout={layout}>
         {this.initFormList()}

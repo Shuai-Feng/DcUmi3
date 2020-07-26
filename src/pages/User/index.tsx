@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Card, Button, Form, Input, Modal, message } from 'antd';
-import ETable from '@/components/ETable/Index';
+import ETable from '@/components/ETable';
 import UserForm from '@/components/User/UserForm';
 
 import Axios from '@/axios';

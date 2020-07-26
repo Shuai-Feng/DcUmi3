@@ -5,7 +5,7 @@ export interface IETableProps {
   columns: Array<any>;
   updateSelectedItem?: any;
   rowSelection?: any;
-  dataSource: any;
+  dataSource?: any;
   selectedRowKeys?: any;
   selectedItem?: any;
   selectedIds?: any;
