@@ -1,11 +1,12 @@
 import * as React from 'react';
 
-import { Card, Button, Modal } from 'antd';
+import { Card, Button, Modal, message } from 'antd';
 import Utils from '@/utils';
 import ETable from '@/components/ETable';
 //引入关于permission的自定义组件
 import RoleForm from '@/components/permission/RoleForm';
 import PermEditForm from '@/components/permission/PermEditForm';
+import RoleAuthForm from '@/components/permission/RoleAuthForm';
 import Axios from '@/axios';
 
 export interface IPermissionProps {}
@@ -18,6 +19,13 @@ export interface IPermissionState {
 
   isUserVisible: boolean;
   isPermVisible: boolean;
+  isRoleAuthVisible: boolean;
+
+  detailInfo?: any;
+  menuInfo?: any;
+
+  mockData?: Array<any>;
+  targetKeys?: Array<any>;
 }
 
 export default class Permission extends React.Component<
@@ -30,10 +38,15 @@ export default class Permission extends React.Component<
       dataSource: [],
       isUserVisible: false,
       isPermVisible: false,
+      isRoleAuthVisible: false,
     };
   }
   //角色表单实例
+
   roleForm: any;
+  //角色权限更改订单实例
+  PermForm: any;
+
   requestList = () => {
     Axios.ajax({
       url: '/role/list',
@@ -55,21 +68,10 @@ export default class Permission extends React.Component<
   componentDidMount() {
     this.requestList();
   }
+
   handleRoleCrate = () => {
     this.setState({
       isUserVisible: true,
-    });
-  };
-  handlePermSet = () => {
-    let item: any = this.state.selectedItem;
-    if (!item) {
-      Modal.info({
-        content: '请选择一条记录',
-      });
-      return;
-    }
-    this.setState({
-      isPermVisible: true,
     });
   };
   handleRoleSubmit = () => {
@@ -84,11 +86,120 @@ export default class Permission extends React.Component<
         this.setState({
           isUserVisible: false,
         });
+        message.success('用户创建成功');
         this.requestList();
       }
     });
     this.setState({
       isUserVisible: true,
+    });
+  };
+
+  handlePermSet = () => {
+    let item: any = this.state.selectedItem;
+    if (!item) {
+      Modal.info({
+        content: '请选择一条记录',
+      });
+      return;
+    }
+    this.setState({
+      isPermVisible: true,
+      detailInfo: item,
+      menuInfo: item.menus,
+    });
+  };
+
+  hanldePermSubmit = () => {
+    let data = this.PermForm.props.form.getFieldsValue();
+    data.role_id = this.state.selectedItem.id;
+    data.menu = this.state.menuInfo;
+    Axios.ajax({
+      url: '/permision/edit',
+      data: {
+        params: {
+          ...data,
+        },
+      },
+    }).then(res => {
+      if (res) {
+        message.success('权限修改已完成');
+        this.setState({
+          isPermVisible: false,
+        });
+        this.requestList();
+      }
+    });
+  };
+
+  //UserAuth 设计逻辑
+  handleRoleAuthSet = () => {
+    let item = this.state.selectedItem;
+    if (!item) {
+      Modal.info({
+        content: '请选择一条记录',
+      });
+      return;
+    }
+    this.setState({
+      isRoleAuthVisible: true,
+      detailInfo: item,
+    });
+    this.getRoleRequestList(item.id);
+  };
+  getRoleRequestList = (id: any) => {
+    Axios.ajax({
+      url: '/role/user_list',
+      data: {
+        params: {
+          id,
+        },
+      },
+    }).then((res: any) => {
+      if (res && res.code == 0) {
+        this.getAuthuserList(res.result);
+      }
+    });
+  };
+  getAuthuserList = (datasource: Array<any>) => {
+    console.log(datasource);
+    const mockData: Array<any> = [];
+    const targetKeys: Array<any> = [];
+    //@ts-ignore
+    if (datasource || datasource.length > 0) {
+      datasource.forEach((item: any, index: number) => {
+        const data = {
+          key: item.user_id,
+          title: item.user_name,
+          status: item.status,
+        };
+        if (data.status == 1) {
+          targetKeys.push(data.key);
+        }
+        mockData.push(data);
+      });
+    }
+    this.setState({ mockData, targetKeys });
+  };
+  handleUserAuthSubmit = () => {
+    let data: any = {};
+    //argument: targetID
+    data.user_ids = this.state.targetKeys;
+    //argetment:role.id from selectedItem
+    data.role_id = this.state.selectedItem.id;
+    console.log(data);
+    Axios.ajax({
+      url: 'role/user_role_edit',
+      data: {
+        params: { ...data },
+      },
+    }).then(res => {
+      if (res) {
+        message.success('已更改用户授权');
+        this.setState({
+          isRoleAuthVisible: false,
+        });
+      }
     });
   };
   public render() {
@@ -144,7 +255,11 @@ export default class Permission extends React.Component<
           >
             设置权限
           </Button>
-          <Button type="primary" style={{ marginLeft: 10 }}>
+          <Button
+            type="primary"
+            style={{ marginLeft: 10 }}
+            onClick={this.handleRoleAuthSet}
+          >
             用户授权
           </Button>
         </Card>
@@ -177,13 +292,50 @@ export default class Permission extends React.Component<
           title="设置权限"
           width={600}
           visible={this.state.isPermVisible}
+          onOk={this.hanldePermSubmit}
           onCancel={() => {
             this.setState({
               isPermVisible: false,
             });
           }}
         >
-          <PermEditForm detail={this.state.selectedItem} />
+          <PermEditForm
+            wrappedComponentRef={(init: any) => {
+              this.PermForm = init;
+            }}
+            detail={this.state.detailInfo}
+            menuInfo={this.state.menuInfo}
+            patchMenuInfo={(checkedkeys: any) => {
+              this.setState({
+                menuInfo: checkedkeys,
+              });
+              console.log(this.state.menuInfo);
+            }}
+          />
+        </Modal>
+        <Modal
+          visible={this.state.isRoleAuthVisible}
+          onCancel={() => {
+            this.setState({
+              isRoleAuthVisible: false,
+            });
+          }}
+          onOk={this.handleUserAuthSubmit}
+        >
+          <RoleAuthForm
+            wrappedComponentRef={(init: any) => {
+              this.PermForm = init;
+            }}
+            detail={this.state.detailInfo}
+            targetKeys={this.state.targetKeys}
+            mockData={this.state.mockData}
+            //用于同步targetKeys
+            pathUserInfo={(targetKeys: any) => {
+              this.setState({
+                targetKeys,
+              });
+            }}
+          />
         </Modal>
       </div>
     );

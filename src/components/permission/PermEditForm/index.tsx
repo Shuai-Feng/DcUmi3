@@ -9,6 +9,8 @@ import data from '@/components/NavLeft/menuConfig';
 import FormItem from 'antd/lib/form/FormItem';
 export interface PermProps extends FormComponentProps {
   detail: any;
+  patchMenuInfo: any;
+  menuInfo: any;
 }
 
 export interface PermState {}
@@ -18,6 +20,10 @@ class PermEditForm extends React.Component<PermProps, PermState> {
     super(props);
     this.state = {};
   }
+  onCheck = (checkedKeys: any) => {
+    this.props.patchMenuInfo(checkedKeys);
+  };
+
   renderTreeNode = (data: any): any => {
     return data.map((item: any) => {
       if (item.children) {
@@ -33,7 +39,7 @@ class PermEditForm extends React.Component<PermProps, PermState> {
   };
   public render() {
     let { getFieldDecorator } = this.props.form;
-    let { detail } = this.props;
+    let { detail, menuInfo } = this.props;
     const formLayout = {
       labelCol: { span: 5 },
       wrapperCol: { span: 16 },
@@ -54,7 +60,14 @@ class PermEditForm extends React.Component<PermProps, PermState> {
               </Select>,
             )}
           </FormItem>
-          <Tree checkable defaultExpandAll>
+          <Tree
+            checkable
+            defaultExpandAll
+            checkedKeys={menuInfo}
+            onCheck={checkedKeys => {
+              this.onCheck(checkedKeys);
+            }}
+          >
             <TreeNode title="平台授权" key="platform_all">
               {this.renderTreeNode(data)}
             </TreeNode>
