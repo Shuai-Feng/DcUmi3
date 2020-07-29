@@ -22,6 +22,7 @@ export default class App extends React.Component<IAppProps, IAppState> {
     myMap:''
   }
   renderMap = (result:any)=>{
+      console.log(result)
       let myMap:any = <Map  style={{height:450}} center={{lng: result.position_list[0].lon+0.01, lat: result.position_list[0].lat-0.01}} zoom="13" >
               <NavigationControl/>
               {this.drawMarker(result.position_list)}
