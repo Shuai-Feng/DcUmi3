@@ -1,181 +1,177 @@
-import * as React from 'react';
-import BaseForm from '@/components/BaseForm';
-import { Card } from 'antd';
-import Axios from '@/axios';
+import React,{ useEffect,useState } from 'react';
+import { Card, message } from 'antd';
+import SForm,{SFormItemProps} from '@/component/SForm';
+import SFaxios from '@/utils/axios';
 
 //@ts-ignore
-import { Map, Polyline } from 'react-bmap';
+const BMap = window.BMap;
 
-export interface IBikeMapProps {}
-
-export interface IBikeMapState {
-  total_count: number;
-  myMap?: any;
+interface IBikePageProps {
 }
 
-export default class BikeMap extends React.Component<
-  IBikeMapProps,
-  IBikeMapState
-> {
-  constructor(props: IBikeMapProps) {
-    super(props);
-    this.state = {
-      total_count: 0,
-    };
-  }
-  params = {
-    page: 1,
-  };
+const BikePage: React.FunctionComponent<IBikePageProps> = (props) => {
 
-  //用于存放地图的实例
-  map: any;
+    //bikeInfo 控制Setstate
+    const  [bikeData,setBikeData ] = useState<any>();
 
-  requestList = () => {
-    Axios.ajax({
-      url: '/map/bike_list',
-      data: {
-        params: this.params,
-      },
-    }).then((res: any) => {
-      this.setState({
-        total_count: res.result.total_count,
-      });
-      this.renderMap(res.result);
-    });
-  };
-  drawRoute = (result: Array<any>) => {};
-  drawBikePoint = (result: Array<any>) => {};
-  renderMap(result: any) {
-    console.log('renderMap', result);
-    let list: any = result.route_list;
-    this.map = new window.BMap.Map('container', { enableMapClick: false });
-    //
+    const SFormItem:Array<SFormItemProps> = [
+        {
+            type:'Select',
+            field:'city_name',
+            label:'城市选择',
+            width:80,
+            initialValue:1,
+            list:[
+                {
+                    id:0,
+                    name:"全部"
+                },
+                {
+                    id:1,
+                    name:"进行中"
+                },
+                {
+                    id:2,
+                    name:"行程结束"
+                }
+            ]
+        },{
+            type:'DateZoom',
+            field:'bikeOrderTime',
+            label:'订单时间'
+        },{
+            type:'Select',
+            field:'city_name',
+            label:'订单选择',
+            width:80,
+            initialValue:1,
+            list:[
+                {
+                    id:0,
+                    name:"全部"
+                },
+                {
+                    id:1,
+                    name:"进行中"
+                },
+                {
+                    id:2,
+                    name:"行程结束"
+                }
+            ]
+        }
+    ]
 
-    this.map.enableScrollWheelZoom();
-    //获得起点和终点
-    let gps1 = list[0].split(',');
-    let startPoint = new window.BMap.Point(gps1[0], gps1[1]);
-    let gps2 = list[list.length - 1].split(',');
-    let endPoint = new window.BMap.Point(gps2[0], gps2[1]);
+    var a:string;
 
-    this.map.centerAndZoom(endPoint, 11);
+    //渲染基础地图界面
+    let initialMap = (mapData:any)=>{
+        
+        if(!BMap){
+            message.info('地图模块出了点问题，不过不是你的问题')
+            return
+        }
 
-    //绘制行车起点
-    let startPointIcon = new window.BMap.Icon(
-      '/assets/start_point.png',
-      new window.BMap.Size(36, 42),
-      {
-        imageSize: new window.BMap.Size(36, 42),
-        anchor: new window.BMap.Size(18, 42),
-      },
-    );
-    //绘制行车终点
-    var bikeMarkerStart = new window.BMap.Marker(startPoint, {
-      icon: startPointIcon,
-    });
-    this.map.addOverlay(bikeMarkerStart);
+        //实例话地图控件
 
-    let endPointIcon = new window.BMap.Icon(
-      '/assets/end_point.png',
-      new window.BMap.Size(36, 42),
-      {
-        imageSize: new window.BMap.Size(36, 42),
-        anchor: new window.BMap.Size(18, 42),
-      },
-    );
+        let myMap = new BMap.Map('container');
+        myMap.centerAndZoom(new BMap.Point(116.404, 39.915),15);
 
-    var bikeMarkerend = new window.BMap.Marker(endPoint, {
-      icon: endPointIcon,
-    });
-    this.map.addOverlay(bikeMarkerend);
-    //绘制形式路线
-    let routeList: Array<any> = [];
-    list.forEach((item: any) => {
-      let p = item.split(',');
-      let point = new window.BMap.Point(p[0], p[1]);
-      routeList.push(point);
-    });
-    let polyLine = new window.BMap.Polyline(routeList, {
-      storkeColor: '#ef4136',
-      storkeWeight: 3,
-      storkeOpactiy: 1,
-    });
-    this.map.addOverlay(polyLine);
-    //服务区路线
-    let serviceList: Array<any> = result.service_list;
-    let servicePointist: Array<any> = [];
-    serviceList.forEach((item: any) => {
-      let point = new window.BMap.Point(item.lon, item.lat);
-      servicePointist.push(point);
-    });
-    let polyServiceLine: any = new window.BMap.Polyline(servicePointist, {
-      storkeColor: '#ef4136',
-      storkeWeight: 3,
-      storkeOpactiy: 1,
-    });
-    this.map.addOverlay(polyServiceLine);
+        let list = mapData.route_list;
 
-    //绘制地图中的bike
-    let bikeList = result.bike_list;
-    let bikeIcon = new window.BMap.Icon(
-      '/assets/bike.jpg',
-      new window.BMap.Size(36, 42),
-      {
-        imageSize: new window.BMap.Size(36, 42),
-        anchor: new window.BMap.Size(18, 42),
-      },
-    );
-    bikeList.forEach((item: any) => {
-      let p = item.split(',');
-      let point = new window.BMap.Point(p[0], p[1]);
-      let bikeMarker = new window.BMap.Marker(point, { icon: bikeIcon });
-      this.map.addOverlay(bikeMarker);
-    });
-    //添加地图控件
-    var top_right_control = new window.BMap.ScaleControl({
-      anchor: window.BMAP_ANCHOR_TOP_RIGHT,
-    });
-    var top_right_navigation = new window.BMap.NavigationControl({
-      anchor: window.BMAP_ANCHOR_TOP_RIGHT,
-    });
-    //添加控件和比例尺
-    this.map.addControl(top_right_control);
-    this.map.addControl(top_right_navigation);
-    this.map.enableScrollWheelZoom(true);
-  }
+        //绘制开始起点和终止点
+        let gps1 = list[0].split(',');
+        let startPoint = new BMap.Point(gps1[0],gps1[1]);
+        let startPointIcon = new BMap.Icon('/asset/start_point.png',new BMap.Size(36,42),{
+            imageSize:new BMap.Size(36,42),
+            anchor:new BMap.Size(18,42)
+        })
+        let bikeMakerStart = new BMap.Marker(startPoint,{icon:startPointIcon});
+        myMap.addOverlay(bikeMakerStart)
 
-  componentDidMount() {
-    this.requestList();
-  }
-  public render() {
-    const formList = [
-      {
-        type: 'TIME',
-      },
-      {
-        type: 'SELECT',
-        label: '订单状态',
-        field: 'order_status',
-        placeholder: '全部',
-        initialValue: '0',
-        width: 100,
-        list: [
-          { id: '0', name: '全部' },
-          { id: '1', name: '进行中' },
-          { id: '2', name: '行程结束' },
-        ],
-      },
-    ];
-    return (
-      <div>
-        <Card>
-          <BaseForm formList={formList} showButton />
-        </Card>
-        <Card style={{ marginTop: 10 }}>
-          <div>共{this.state.total_count}辆车</div>
-          <div id="container" style={{ height: 500 }}></div>
-        </Card>
-      </div>
-    );
-  }
-}
+        let gps2 = list[list.length - 1].split(',');
+        let endPoint = new BMap.Point(gps2[0], gps2[1]);
+        let endPointIcon = new BMap.Icon('/asset/end_point.png',new BMap.Size(36,42),{
+            imageSize:new BMap.Size(36,42),
+            anchor:new BMap.Size(18,42)
+        });
+        let bikeMakerEnd = new BMap.Marker(endPoint,{icon:endPointIcon});
+        myMap.addOverlay(bikeMakerEnd)
+
+
+        //服务路径绘制
+        let serviceList = mapData.service_list;
+        let servicePointList:any = [];
+        serviceList.forEach((item:any)=>{
+            let point = new BMap.Point(item.lon,item.lat);
+            servicePointList.push(point)
+        })
+        let polyServiceLine = new BMap.Polygon(servicePointList,{
+            strokeColor: '#CE0000',
+            strokeWeight: 4,
+            strokeOpacity: 1,
+            fillColor:'#ff8605',
+            fillOpacity:0.4
+        });
+        myMap.addOverlay(polyServiceLine)
+
+        //行驶路径绘制
+        let routeList:any = [];
+        list.forEach((item:any)=>{
+            let p = item.split(",");
+            let point = new BMap.Point(p[0],p[1]);
+            routeList.push(point)
+        })
+        let polyLine  = new BMap.Polyline(routeList,{
+            strokeColor:"#ef4136",
+            strokeWidth:3,
+            storkeOpacity:1
+        })
+        myMap.addOverlay(polyLine);
+
+        myMap.centerAndZoom(endPoint, 11);
+
+        //添加比例尺和控件
+        let top_right_control = new BMap.ScaleControl({anchor:1})
+        let top_right_navigation = new BMap.NavigationControl({anchor:1})
+        myMap.addControl(top_right_control);
+        myMap.addControl(top_right_navigation);
+        myMap.enableScrollWheelZoom(true);
+
+        let bikeList = mapData.bike_list;
+        let bikeIcon = new BMap.Icon('/asset/bike.jpg',new BMap.Size(36,42),{
+            imageSize: new BMap.Size(36, 42),
+            anchor: new BMap.Size(18, 42)
+        })
+        
+        bikeList.forEach((item:any)=>{
+            let p = item.split(',');
+            let point = new BMap.Point(p[0],p[1]);
+            let bikeMarker = new BMap.Marker(point,{icon:bikeIcon})
+            myMap.addOverlay(bikeMarker);
+        })
+    }
+
+    let handleRequest = ()=>{
+         SFaxios.ajax({url:'/map/bike_list'}).then((res:any)=>{
+            let mapData = res.result;
+            initialMap(mapData);
+         })
+    
+    }
+
+    useEffect(()=>{
+        handleRequest();
+    },[])
+  return <div className="BikePage">
+      <Card>
+        <SForm FormList={ SFormItem } />
+      </Card>
+      <Card style={{marginTop:10}}>
+        <div>共{}辆车</div>
+        <div id='container' style={{height:500}}></div>
+      </Card>
+  </div>;
+};
+
+export default BikePage;

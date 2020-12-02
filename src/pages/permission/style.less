@@ -1,0 +1,19 @@
+.PermissionPage {
+  .grid-test {
+    @grap: 12px;
+
+    display: grid;
+    grid-template-columns: 90px 90px 90px;
+    column-gap: @grap;
+    row-gap: @grap;
+
+    @media screen and (max-width: 400px) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .content-wrap {
+    width: 100%;
+    padding: 8px;
+    background-color: #ffffff;
+  }
+}

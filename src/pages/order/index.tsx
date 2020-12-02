@@ -1,270 +1,209 @@
 import * as React from 'react';
-import BaseForm from '@/components/BaseForm';
-import { Card, Button, Table, message, Modal, Form } from 'antd';
-import { TableRowSelection } from 'antd/lib/table/interface';
+import { Card, Button, Table, message, Modal } from 'antd';
+import { ColumnProps, TableRowSelection } from 'antd/es/table';
+import SForm, { SFormItemProps } from '@/component/SForm';
+import SFaxios from '@/utils/axios';
 
-import axios from '@/axios';
-import FormItem from 'antd/lib/form/FormItem';
-// declare type TableRowSelection = any;
+interface IOrderPageProps {}
 
-export interface IAppProps {}
+const OrderPage: React.FunctionComponent<IOrderPageProps> = props => {
+  // 存放顶点表格上的数据
+  const [tableList, setTableList] = React.useState([]);
+ 
+  //选择表格选项的Id
+  const [rowKeys, setRowKeys] = React.useState<Array<any>>([]);
+  //选择条目的内容
+  const [rowData, setRowData] = React.useState<any>();
+  //控制模态框的希纳是;
 
-export interface IAppState {
-  list: Array<any>;
-  selectedRowKeys: Array<any>;
-  selectedItem?: any;
-  orderConfirmVisble: boolean;
-  orderInfo?: any;
-}
-
-export default class App extends React.Component<IAppProps, IAppState> {
-  constructor(props: IAppProps) {
-    super(props);
-    this.state = {
-      list: [],
-      selectedRowKeys: [],
-      selectedItem: '',
-      orderConfirmVisble: false,
-      orderInfo: {},
-    };
-  }
-
-  params = {
-    page: 1,
-  };
-  formList = [
+  const columns: Array<ColumnProps<{}>> = [
     {
-      type: 'SELECT',
-      label: '城市',
-      field: 'city',
-      placeholder: '全部',
-      initialValue: '1',
-      width: 80,
-      list: [
-        { id: '0', name: '全部' },
-        { id: '1', name: '北京' },
-        { id: '2', name: '天津' },
-        { id: '3', name: '上海' },
-      ],
+      title: '订单编号',
+      dataIndex: 'order_sn',
     },
     {
-      type: 'SELECT',
-      label: '订单状态',
-      field: 'order_status',
-      placeholder: '全部',
-      initialValue: '1',
-      width: 80,
-      list: [
-        { id: '0', name: '全部' },
-        { id: '1', name: '进行中' },
-        { id: '2', name: '结束行程' },
-      ],
+      title: '车辆编号',
+      dataIndex: 'bike_sn',
     },
     {
-      type: 'TIME',
+      title: '用户名',
+      dataIndex: 'user_name',
+    },
+    {
+      title: '手机号',
+      dataIndex: 'mobile',
+    },
+    {
+      title: '里程',
+      dataIndex: 'distance',
+    },
+    {
+      title: '行驶时长',
+      dataIndex: 'total_time',
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+    },
+    {
+      title: '开始时间',
+      dataIndex: 'start_time',
+    },
+    {
+      title: '结束时间',
+      dataIndex: 'end_time',
+    },
+    {
+      title: '订单金额',
+      dataIndex: 'total_fee',
+    },
+    {
+      title: '实付金额',
+      dataIndex: 'user_pay',
     },
   ];
-  onRowClick = (record: any, index: number) => {
-    let selectKey = [index];
-    this.setState({
-      selectedRowKeys: selectKey,
-      selectedItem: record,
-    });
+
+  const formItemList: Array<SFormItemProps> = [
+    {
+      type: 'Select',
+      label: '城市',
+      width: 140,
+      field: 'city',
+      list: [
+        { id: '', name: '全部' },
+        { id: 'beijin', name: '北京' },
+        { id: 'tianjin', name: '天津' },
+      ],
+    },
+    {
+      type: 'DateZoom',
+      label: '订单时间',
+      field: 'order_time',
+    },
+    {
+      type: 'Select',
+      label: '订单状态',
+      width: 140,
+      field: 'order_status',
+      list: [
+        { id: '', name: '全部' },
+        { id: '1', name: '进行中' },
+        { id: '2', name: '已完成' },
+      ],
+    },
+  ];
+  //表格选择时进行的控制
+  const rowSelection: TableRowSelection<{}> = {
+    type: 'radio',
+    selectedRowKeys: rowKeys,
+    onChange: (selectedRowKeys: any, selectedRows: any) => {
+      setRowKeys(selectedRowKeys);
+      setRowData(selectedRows);
+    },
   };
-  openOrderDetial = () => {
-    let item: any = this.state.selectedItem;
-    if (!item) {
-      message.warning('请选择一条记录');
-      return;
-    }
-    window.open(`/#/detail/${item.id}`, '_blank');
-  };
-  handleConfirm = () => {
-    let item: any = this.state.selectedItem;
-    if (!item) {
-      Modal.info({
-        title: '信息',
-        content: '请选择一条订单进行结束',
-      });
-      return;
-    }
-    axios
-      .ajax({
-        url: '/order/bike_info',
-        data: {
-          params: {
-            orderId: item.id,
-          },
-        },
-      })
-      .then((res: any) => {
-        console.log(res);
-        if (res.code == 0) {
-          this.setState({
-            orderInfo: res.result,
-            orderConfirmVisble: true,
-          });
-        }
-      });
-  };
-  handleFinishOrder = () => {
-    let item = this.state.selectedItem;
-    axios
-      .ajax({
-        url: '/order/finish_order',
-        data: {
-          params: {
-            orderId: item.id,
-          },
-        },
-      })
-      .then((res: any) => {
-        if (res.code == 0) {
-          message.success('订单结束成功');
-          this.setState({
-            orderConfirmVisble: false,
-          });
-          this.requestList();
-        }
-      });
-  };
-  requestList = () => {
-    axios
-      .ajax({
+
+  //表格数据渲染
+  let requestList = async (params: any) => {
+    try {
+      let tableData: any = await SFaxios.ajax({
         url: '/orderlist',
         data: {
-          params: this.params,
+          params,
         },
+      });
+      tableData = tableData.result.item_list;
+      tableData.forEach((item: any, index: number) => {
+        item.key = index;
+      });
+      setTableList(tableData || []);
+    } catch (error) {
+      message.warning('出问题啦\n心不是你的问题');
+    }
+  };
+
+  //筛选表单提交时所触发的事件
+  let handleFilterSubmit = (filteData: any) => {
+    requestList(filteData);
+  };
+  //
+  let handleUserDelete = () => {
+    SFaxios.ajax({
+      url: '/order/finish_order',
+      data: {
+        params: {
+          order_id: rowData[0].order_sn,
+        },
+      },
+    })
+      .then(res => {
+        message.success('订单结束已完成');
       })
-      .then((res: any) => {
-        let list = res.result.item_list.map((item: any, index: number) => {
-          item.key = index;
-          return item;
-        });
-        this.setState({
-          list,
-        });
+      .catch(rej => {
+        message.warning('有问题哦');
       });
   };
-  componentDidMount() {
-    this.requestList();
-  }
-  public render() {
-    const columns = [
-      {
-        title: '订单编号',
-        dataIndex: 'order_sn',
-      },
-      {
-        title: '车辆编号',
-        dataIndex: 'bike_sn',
-      },
-      {
-        title: '用户名',
-        dataIndex: 'user_name',
-      },
-      {
-        title: '手机号',
-        dataIndex: 'mobile',
-      },
-      {
-        title: '里程',
-        dataIndex: 'distance',
-        render(distance: number) {
-          return distance / 1000 + 'Km';
-        },
-      },
-      {
-        title: '行驶时长',
-        dataIndex: 'total_time',
-      },
-      {
-        title: '状态',
-        dataIndex: 'status',
-      },
-      {
-        title: '开始时间',
-        dataIndex: 'start_time',
-      },
-      {
-        title: '结束时间',
-        dataIndex: 'end_time',
-      },
-      {
-        title: '订单金额',
-        dataIndex: 'total_fee',
-      },
-      {
-        title: '实付金额',
-        dataIndex: 'user_pay',
-      },
-    ];
-    const selectedRowKeys = this.state.selectedRowKeys;
-    const rowSelection: TableRowSelection<any> = {
-      type: 'radio',
-      selectedRowKeys,
-    };
-    const formItemLayout = {
-      labelCol: { span: 5 },
-      wrapperCol: { span: 19 },
-    };
-    return (
-      <div>
-        <Card>
-          <BaseForm formList={this.formList} showButton layout="inline" />
-        </Card>
-        <Card>
-          <Button
-            type="primary"
-            style={{ marginRight: 10 }}
-            onClick={this.openOrderDetial}
-          >
-            订单详情
-          </Button>
-          <Button type="primary" onClick={this.handleConfirm}>
-            结束订单
-          </Button>
-        </Card>
-        <div className="content-wrap">
-          <Table
-            columns={columns}
-            dataSource={this.state.list}
-            rowSelection={rowSelection}
-            onRow={(record, index) => {
-              return {
-                onClick: () => {
-                  this.onRowClick(record, index);
-                },
-              };
-            }}
-          />
-        </div>
-        <Modal
-          title="结束订单"
-          visible={this.state.orderConfirmVisble}
-          onCancel={() => {
-            this.setState({
-              orderConfirmVisble: false,
-            });
-          }}
-          onOk={this.handleFinishOrder}
+
+  //订单结束逻辑
+  let handleOrderEnd = () => {
+    if (rowKeys.length > 0) {
+      Modal.confirm({
+        title: `是否要结束订单 ${rowData[0].bike_sn}`,
+        okText: '确定',
+        cancelText: '取消',
+        onOk: handleUserDelete,
+      });
+    } else {
+      message.warning('请选择一条记录');
+    }
+  };
+  //显示订单详情
+  let handleOrderDetail = () => {
+    if (rowKeys.length > 0) {
+      window.open('/#/detail/order/' + rowData[0].order_sn, '_blank');
+    } else {
+      message.warning('请选择一条记录');
+    }
+  };
+  React.useEffect(() => {
+    requestList({ page: 1 });
+  }, []);
+
+  return (
+    <div className="OrderPage">
+      <Card>
+        {/* <OrderForm/> */}
+        <SForm FormList={formItemList} handleSubmit={handleFilterSubmit} />
+      </Card>
+      <Card>
+        <Button
+          type="primary"
+          style={{ marginRight: 10 }}
+          onClick={handleOrderDetail}
         >
-          <Form>
-            <FormItem label="车辆编号" {...formItemLayout}>
-              {this.state.orderInfo.bike_sn}
-            </FormItem>
-            <FormItem label="剩余电量" {...formItemLayout}>
-              {this.state.orderInfo.battery + '%'}
-            </FormItem>
-            <FormItem label="行程开始时间" {...formItemLayout}>
-              {this.state.orderInfo.start_time}
-            </FormItem>
-            <FormItem label="当前位置" {...formItemLayout}>
-              {this.state.orderInfo.location}
-            </FormItem>
-          </Form>
-        </Modal>
-      </div>
-    );
-  }
-}
+          订单详情
+        </Button>
+        <Button type="primary" onClick={handleOrderEnd}>
+          结束订单
+        </Button>
+      </Card>
+      <Card>
+        <Table
+          columns={columns}
+          dataSource={tableList}
+          rowSelection={rowSelection}
+          onRow={(record: any, index: any) => {
+            return {
+              onClick: () => {
+                setRowKeys([index]);
+                setRowData([record]);
+              }
+            };
+          }}
+          
+        />
+      </Card>
+    </div>
+  );
+};
+
+export default OrderPage;

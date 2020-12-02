@@ -1,343 +1,260 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Card, Button, Table, Modal,message, Form } from 'antd';
+import { ColumnProps,TableRowSelection } from 'antd/es/table';
 
-import { Card, Button, Modal, message } from 'antd';
-import Utils from '@/utils';
-import ETable from '@/components/ETable';
-//引入关于permission的自定义组件
-import RoleForm from '@/components/permission/RoleForm';
-import PermEditForm from '@/components/permission/PermEditForm';
-import RoleAuthForm from '@/components/permission/RoleAuthForm';
-import Axios from '@/axios';
 
-export interface IPermissionProps {}
+import SFaxios from '@/utils/axios';
+import SFevent from '@/utils/SFevent';
+import { RoleForm,PermEditForm,UserAuthForm } from './component';
 
-export interface IPermissionState {
-  dataSource: any;
-  selectedRowKeys?: any;
-  selectedIds?: Array<any>;
-  selectedItem?: any;
+//引入样式表
+import './style.less';
 
-  isUserVisible: boolean;
-  isPermVisible: boolean;
-  isRoleAuthVisible: boolean;
+interface IPermissionProps {}
 
-  detailInfo?: any;
-  menuInfo?: any;
+const Permission: React.FunctionComponent<IPermissionProps> = props => {
 
-  mockData?: Array<any>;
-  targetKeys?: Array<any>;
-}
 
-export default class Permission extends React.Component<
-  IPermissionProps,
-  IPermissionState
-> {
-  constructor(props: IPermissionProps) {
-    super(props);
-    this.state = {
-      dataSource: [],
-      isUserVisible: false,
-      isPermVisible: false,
-      isRoleAuthVisible: false,
-    };
-  }
-  //角色表单实例
+  //表格里的数据
+  const [tableList, setTableList] = useState<Array<any>>([]);
+  //选择表格选项的Id
+  const [rowKeys, setRowKeys] = useState<Array<any>>([]);
+  //选择条目的内容
+  const [rowData, setRowData] = useState<any>();
+  //用于判断模态框
+  const [modalVisible, setModal] = useState<boolean>(false);
+  const [modalTitle,setTitle] = useState<'create'|'setPir'|'userPir'|''>('')
 
-  roleForm: any;
-  //角色权限更改订单实例
-  PermForm: any;
 
-  requestList = () => {
-    Axios.ajax({
-      url: '/role/list',
-      data: {
-        params: {},
-      },
-    }).then((res: any) => {
-      if (res.code == 0) {
-        let dataSource = res.result.item_list.map((item: any, i: number) => {
-          item.key = i;
-          return item;
-        });
-        this.setState({
-          dataSource,
-        });
+  //获得各个表单的实例
+  const [Form_inst, setRForm] = useState<any>();
+
+  //userAuthList 
+  const [AuthuserList,setAuthList] = useState<any>({mockData:[],targetKeys:[]});
+
+  //表格的列
+  const tableColum:Array<ColumnProps<{}>> = [
+      {
+          title:"用户Id",
+          dataIndex:'id'
+      },{
+          title:"角色名称",
+          dataIndex:'role_name'
+      },{
+          title:'创建时间',
+          dataIndex:'create_time'
+      },{
+          title:'使用状态',
+          dataIndex:'status',
+          render(status){
+            if(status == 1 ){
+                return '启用'
+            }else{
+                return '停用'
+            }
+          }
+      },{
+          title:'使用状态',
+          dataIndex:'authorize_time'
+      },{
+          title:'授权人',
+          dataIndex:'authorize_user_name'
       }
-    });
-  };
-  componentDidMount() {
-    this.requestList();
-  }
+  ]
 
-  handleRoleCrate = () => {
-    this.setState({
-      isUserVisible: true,
-    });
-  };
-  handleRoleSubmit = () => {
-    let data = this.roleForm.props.form.getFieldsValue();
-    Axios.ajax({
-      url: '/role/create',
-      data: {
-        pramas: data,
-      },
-    }).then((res: any) => {
-      if (res.code == 0) {
-        this.setState({
-          isUserVisible: false,
-        });
-        message.success('用户创建成功');
-        this.requestList();
-      }
-    });
-    this.setState({
-      isUserVisible: true,
-    });
-  };
-
-  handlePermSet = () => {
-    let item: any = this.state.selectedItem;
-    if (!item) {
-      Modal.info({
-        content: '请选择一条记录',
-      });
-      return;
+  //表格行学配置项
+  const rowSelection:TableRowSelection<{}> = {
+    type:'radio',
+    selectedRowKeys:rowKeys,
+    onChange:(selectRowKey:any,selectRows:any)=>{
+      setRowKeys(selectRowKey);
+      setRowData(selectRows);
     }
-    this.setState({
-      isPermVisible: true,
-      detailInfo: item,
-      menuInfo: item.menus,
-    });
-  };
+  }
 
-  hanldePermSubmit = () => {
-    let data = this.PermForm.props.form.getFieldsValue();
-    data.role_id = this.state.selectedItem.id;
-    data.menu = this.state.menuInfo;
-    Axios.ajax({
-      url: '/permision/edit',
-      data: {
-        params: {
-          ...data,
-        },
-      },
-    }).then(res => {
-      if (res) {
-        message.success('权限修改已完成');
-        this.setState({
-          isPermVisible: false,
-        });
-        this.requestList();
-      }
-    });
-  };
+  //负责请求数据的函数
+  let handleRequestList =  async ()=>{
+    let res:any =  await SFaxios.ajax({url:'/role/list'})
+    let tableData:Array<any> = res.result.item_list
+    tableData.forEach((item:any,index:number)=>{
+        item.key = index;
+    })
+    setTableList(tableData);
+  }
 
-  //UserAuth 设计逻辑
-  handleRoleAuthSet = () => {
-    let item = this.state.selectedItem;
-    if (!item) {
-      Modal.info({
-        content: '请选择一条记录',
-      });
-      return;
+  //模拟componentDidmount
+  useEffect(()=>{
+    handleRequestList();
+    
+    SFevent.ee_on('Form_inst',(instant:any)=>{
+        setRForm(instant)
+    })
+
+  },[])
+
+  // useEffect(()=>{
+  //   console.log(Form_inst?.getFieldsValue())
+  // },[Form_inst])
+
+
+  //负责打开模态框的函数
+  let handleModalOpen = (type:'create'|'setPir'|'userPir')=>{
+    
+    if(type == 'create'){
+
+    }else if (rowKeys.length <=0 ){
+      message.info('必须选择一条记录哦')
+      return 
+    }else if(type =='userPir'){
+      getRoleRequestList();
     }
-    this.setState({
-      isRoleAuthVisible: true,
-      detailInfo: item,
-    });
-    this.getRoleRequestList(item.id);
-  };
-  getRoleRequestList = (id: any) => {
-    Axios.ajax({
-      url: '/role/user_list',
-      data: {
-        params: {
-          id,
-        },
-      },
-    }).then((res: any) => {
-      if (res && res.code == 0) {
-        this.getAuthuserList(res.result);
+
+    setModal(true)
+    setTitle(type)
+  }
+
+  //  模态框提交时执行的回调函数
+  let handleOk = async ()=>{
+    let params  = {...Form_inst.getFieldsValue()};
+    let url = '';
+
+    try{
+      await Form_inst.validateFields();
+
+      if(modalTitle == 'create'){
+        url = '/role/create'
+      }else if(modalTitle == 'setPir'){
+        url = '/role/user_role_edit'
+        params = {...params,targetKeys:AuthuserList.targetKeys}
+      }else{
+        url = '/role/user_role_edit'
       }
-    });
-  };
-  getAuthuserList = (datasource: Array<any>) => {
-    console.log(datasource);
+  
+      await SFaxios.ajax({url,data:{
+        params
+      }}).then(res=>{
+        message.success('数据修改成功')
+        handleRequestList();
+        handleModalClose();
+      })
+    }catch(e){
+      message.info('有点问题哦，再检查一下表单吧')
+    }
+  }
+
+
+
+  //关闭模态框执行的函数
+  let handleModalClose =  ()=>{
+      setModal(false)
+      setRForm({})
+  }
+
+
+
+  //角色划分数据请求
+  let getRoleRequestList = async ()=>{
+    let res:any =  await SFaxios.ajax({url:'/role/user_list'})
+    let itemData:Array<any> = res.result
+    itemData.forEach((item:any,index:number)=>{
+        item.key = index;
+    })
+    getAuthuserList(itemData);
+  }
+
+
+
+  // 角色数据加工
+  let getAuthuserList = (datasource: Array<any>)=>{
     const mockData: Array<any> = [];
     const targetKeys: Array<any> = [];
-    //@ts-ignore
-    if (datasource || datasource.length > 0) {
-      datasource.forEach((item: any, index: number) => {
+    if(datasource && datasource.length >0){
+      datasource.forEach((item: any, index: number)=>{
         const data = {
-          key: item.user_id,
-          title: item.user_name,
-          status: item.status,
-        };
-        if (data.status == 1) {
-          targetKeys.push(data.key);
+          key:item.user_id,
+          title:item.user_name,
+          status:item.status
         }
-        mockData.push(data);
-      });
+        if(data.status == 1){
+          targetKeys.push(data.key)
+        }
+        mockData.push(data)
+        setAuthList({ mockData, targetKeys });
+      })
     }
-    this.setState({ mockData, targetKeys });
-  };
-  handleUserAuthSubmit = () => {
-    let data: any = {};
-    //argument: targetID
-    data.user_ids = this.state.targetKeys;
-    //argetment:role.id from selectedItem
-    data.role_id = this.state.selectedItem.id;
-    console.log(data);
-    Axios.ajax({
-      url: 'role/user_role_edit',
-      data: {
-        params: { ...data },
-      },
-    }).then(res => {
-      if (res) {
-        message.success('已更改用户授权');
-        this.setState({
-          isRoleAuthVisible: false,
-        });
-      }
-    });
-  };
-  public render() {
-    const colums = [
-      {
-        title: '角色ID',
-        dataIndex: 'id',
-      },
-      {
-        title: '角色名称',
-        dataIndex: 'role_name',
-      },
-      {
-        title: '创建时间',
-        dataIndex: 'create_time',
-        render: Utils.formateData,
-      },
-      {
-        title: '使用状态',
-        dataIndex: 'status',
-        render(state: any) {
-          if (state == 1) {
-            return '启用';
-          } else {
-            return '停用';
-          }
-        },
-      },
-      {
-        title: '授权时间',
-        dataIndex: 'authorize_time',
-        render: Utils.formateData,
-      },
-      {
-        title: '授权人',
-        dataIndex: 'authorize_user_name',
-      },
-    ];
-    return (
-      <div>
-        <Card>
-          <Button
-            type="primary"
-            style={{ marginLeft: 10 }}
-            onClick={this.handleRoleCrate}
-          >
-            创建角色
-          </Button>
-          <Button
-            type="primary"
-            style={{ marginLeft: 10 }}
-            onClick={this.handlePermSet}
-          >
-            设置权限
-          </Button>
-          <Button
-            type="primary"
-            style={{ marginLeft: 10 }}
-            onClick={this.handleRoleAuthSet}
-          >
-            用户授权
-          </Button>
-        </Card>
-        <Card>
-          <ETable
-            updateSelectedItem={Utils.updateSeletedItem.bind(this)}
-            columns={colums}
-            dataSource={this.state.dataSource}
-            selectedRowKeys={this.state.selectedRowKeys}
-          />
-        </Card>
-        <Modal
-          visible={this.state.isUserVisible}
-          onCancel={() => {
-            this.setState({
-              isUserVisible: false,
-            });
-          }}
-          onOk={() => {
-            this.handleRoleSubmit();
-          }}
-        >
-          <RoleForm
-            wrappedComponentRef={(init: any) => {
-              this.roleForm = init;
-            }}
-          />
-        </Modal>
-        <Modal
-          title="设置权限"
-          width={600}
-          visible={this.state.isPermVisible}
-          onOk={this.hanldePermSubmit}
-          onCancel={() => {
-            this.setState({
-              isPermVisible: false,
-            });
-          }}
-        >
-          <PermEditForm
-            wrappedComponentRef={(init: any) => {
-              this.PermForm = init;
-            }}
-            detail={this.state.detailInfo}
-            menuInfo={this.state.menuInfo}
-            patchMenuInfo={(checkedkeys: any) => {
-              this.setState({
-                menuInfo: checkedkeys,
-              });
-              console.log(this.state.menuInfo);
-            }}
-          />
-        </Modal>
-        <Modal
-          visible={this.state.isRoleAuthVisible}
-          onCancel={() => {
-            this.setState({
-              isRoleAuthVisible: false,
-            });
-          }}
-          onOk={this.handleUserAuthSubmit}
-        >
-          <RoleAuthForm
-            wrappedComponentRef={(init: any) => {
-              this.PermForm = init;
-            }}
-            detail={this.state.detailInfo}
-            targetKeys={this.state.targetKeys}
-            mockData={this.state.mockData}
-            //用于同步targetKeys
-            pathUserInfo={(targetKeys: any) => {
-              this.setState({
-                targetKeys,
-              });
-            }}
-          />
-        </Modal>
-      </div>
-    );
   }
-}
+
+
+
+  const config = {
+    'create':'创建角色',
+    'setPir':'设置权限',
+    'userPir':'用户权限'
+  }
+
+
+  let m_width = {};
+  if (modalTitle === 'userPir') {
+    m_width = {
+      width: 800,
+    };
+  }
+
+
+
+  return (
+    <div className="PermissionPage">
+
+      {/* 菜单选项卡 */}
+      <Card>
+        <div className="grid-test">
+          <Button type="primary" onClick={()=>{handleModalOpen('create')}} >创建角色</Button>
+          <Button type="primary" onClick={()=>{handleModalOpen('setPir')}} >设置权限</Button>
+          <Button type="primary" onClick={()=>{handleModalOpen('userPir')}} >用户权限</Button>
+        </div>
+      </Card>
+
+      {/* 表格区域 */}
+      <div className="content-wrap">
+        <Table 
+            dataSource={tableList}
+            columns={tableColum}
+            rowSelection={rowSelection}
+            onRow={(record:any,index:any)=>{
+              return {
+                onClick:()=>{
+                  setRowKeys([index]);
+                  setRowData([record]);
+                }
+              } 
+            }}
+         />
+      </div>
+
+      {/* 模态框 */}
+
+  
+      <Modal
+        title={config[modalTitle]}
+        visible={modalVisible}
+        onCancel={()=>{handleModalClose()}}
+        onOk={()=>{handleOk()}}
+        {...m_width}
+      >
+        {modalTitle == 'create' ? <RoleForm/> :''}
+        {modalTitle == 'setPir' ? <PermEditForm detailData={rowData[0]} menuData={rowData[0].menus}  /> :''}
+        {modalTitle == 'userPir' ? <UserAuthForm 
+          detailData={rowData[0]} 
+          mockData={AuthuserList.mockData} 
+          targetKeys={AuthuserList.targetKeys} 
+          pathUserInfo = { (targetKeys:any)=>{
+            setAuthList({...AuthuserList,targetKeys});
+          } }
+        /> :''}
+      </Modal>
+
+    </div>
+  );
+};
+
+export default Permission;

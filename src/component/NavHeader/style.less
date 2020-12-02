@@ -1,0 +1,45 @@
+.navheader {
+  .navtop {
+    line-height: 60px;
+    height: 60px;
+    background-color: #fff;
+    padding: 0px 20px;
+    text-align: right;
+    .userName {
+      margin: 0px 12px;
+    }
+    &.blue {
+      background: #09f;
+      color: #fff;
+    }
+  }
+  .logo {
+    img {
+      width: 30px;
+      margin-right: 10px;
+    }
+  }
+  .navbottom {
+    border-top: 1px solid #09f;
+    height: 40px;
+    padding: 0px 20px;
+    background-color: #fff;
+    .breadcum {
+      position: relative;
+      //宽度固定
+      width: 200px;
+
+      line-height: 40px;
+      text-align: center;
+      font-size: 18px;
+      &::after {
+        position: absolute;
+        top: 39px;
+        left: 87px;
+        content: '';
+        border: 12px solid transparent;
+        border-top: 10px solid #fff;
+      }
+    }
+  }
+}

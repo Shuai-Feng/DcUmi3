@@ -1,10 +1,14 @@
-import React from 'react';
-import { Redirect } from 'react-router';
-export default () => {
-  return (
-    <div>
-      <Redirect to="/home" />
-      欢迎来到umiDC 指挥官
-    </div>
-  );
-};
+import React, { useEffect } from 'react';
+import { Redirect } from 'umi';
+
+export interface IIndexPageProps {}
+
+export default class IndexPage extends React.Component<IIndexPageProps> {
+  public render() {
+    return (
+      <div>
+        <Redirect to="/home" />
+      </div>
+    );
+  }
+}

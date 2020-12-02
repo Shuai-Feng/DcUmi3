@@ -1,9 +1,10 @@
-import * as React from 'react';
+import React from 'react';
 import './style.less';
-interface IAppProps {}
 
-const App: React.FunctionComponent<IAppProps> = props => {
-  return <div className="welcome">欢迎来到布里特安防公司</div>;
+interface IHomeProps {}
+
+const Home: React.FunctionComponent<IHomeProps> = props => {
+  return <div className="homepage">欢迎进入单车后台管理系统</div>;
 };
 
-export default App;
+export default Home;

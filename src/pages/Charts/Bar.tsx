@@ -1,112 +1,83 @@
-import * as React from 'react';
-//新版本的ReactEcharts 在安装了 echarts 和 echarts-for-react库后可以直接使用
-import ReactEcharts from 'echarts-for-react';
-import { EChartOption } from 'echarts';
+import React from 'react';
 import { Card } from 'antd';
 
-export interface IAppProps {}
+import { EChartOption } from 'echarts/lib/echarts';
+import ReactEcharts from 'echarts-for-react';
 
-export interface IAppState {}
+import 'echarts/lib/chart/bar';
+import 'echarts/lib/component/tooltip';
+import 'echarts/lib/component/title';
+import 'echarts/lib/component/legend';
+import 'echarts/lib/component/markPoint';
+interface IBarPageProps {}
 
-export default class App extends React.Component<IAppProps, IAppState> {
-  constructor(props: IAppProps) {
-    super(props);
-    this.state = {};
-  }
-  getOption() {
-    //在这里 如果你导入 EChartOption的接口的话，就不用担心写错啦
-    let option: EChartOption = {
-      title: {
-        text: '用户骑行订单',
-      },
-      tooltip: {
-        trigger: 'axis',
-      },
-      xAxis: {
-        data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
-      },
-      yAxis: {
-        type: 'value',
-      },
-      series: [
-        {
-          name: '订单量',
-          type: 'bar',
-          data: [1000, 2000, 1500, 3000, 2000, 1200, 800],
+const BarPage: React.FunctionComponent<IBarPageProps> = props => {
+  let obj1: any = {
+    title: {
+      text: '用户骑行订单',
+    },
+    xAxis: {
+      type: 'category',
+      data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    },
+    yAxis: {
+      type: 'value',
+    },
+    series: [
+      {
+        data: [120, 200, 150, 80, 70, 110, 130],
+        type: 'bar',
+        showBackground: true,
+        backgroundStyle: {
+          color: 'rgba(220, 220, 220, 0.8)',
         },
-      ],
-    };
-    return option;
-  }
-  getOption2() {
-    let option: EChartOption = {
-      title: {
-        text: '用户骑行订单',
       },
-      //legend 是指图表的图例
-      legend: {
-        data: ['ofo', '摩拜', '小黄车'],
-      },
-      xAxis: {
-        data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
-      },
-      yAxis: {
-        type: 'value',
-      },
-      series: [
-        {
-          name: 'OFO',
-          type: 'bar',
-          data: [2000, 3000, 5500, 7000, 8000, 12000, 20000],
-        },
-      ],
-    };
-    return option;
-  }
-  getOption3 = (): EChartOption => {
-    return {
-      title: {
-        text: '某市0 和 1 统计',
-        top: '10px',
-        left: '10px',
-      },
-      xAxis: {
-        data: ['0(受)', '1(攻)'],
-      },
-      yAxis: {
-        type: 'value',
-      },
-      series: [
-        {
-          type: 'bar',
-          data: [10, 0],
-        },
-      ],
-    };
+    ],
   };
-  public render() {
-    return (
-      <div>
-        <Card title="柱形图表之三">
-          <ReactEcharts
-            option={this.getOption3()}
-            style={{ height: 400 }}
-            theme="dark"
-          />
-        </Card>
-        <Card title="柱形图表之二">
-          <ReactEcharts option={this.getOption2()} />
-        </Card>
-        <Card title="柱形图表之一">
-          <ReactEcharts
-            option={this.getOption()}
-            theme="Imooc"
-            notMerge={true}
-            lazyUpdate={true}
-            style={{ height: 500 }}
-          />
-        </Card>
-      </div>
-    );
-  }
-}
+
+  let obj2: EChartOption = {
+    title: {
+      text: '用户骑行订单',
+    },
+    xAxis: {
+      type: 'category',
+      data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    },
+    yAxis: {
+      type: 'value',
+    },
+    legend: {
+      data: ['OFO', '摩拜', '小蓝'],
+    },
+    series: [
+      {
+        name: 'OFO',
+        type: 'bar',
+        data: [2000, 3000, 5500, 7000, 8000, 12000, 20000],
+      },
+      {
+        name: '摩拜',
+        type: 'bar',
+        data: [1500, 3000, 4500, 6000, 8000, 10000, 15000],
+      },
+      {
+        name: '小蓝',
+        type: 'bar',
+        data: [1000, 2000, 2500, 4000, 6000, 7000, 8000],
+      },
+    ],
+  };
+
+  return (
+    <div className="BarPage">
+      <Card title={'折线图'} style={{ marginBottom: 10 }}>
+        <ReactEcharts style={{ height: 500 }} option={obj1} />
+      </Card>
+      <Card>
+        <ReactEcharts style={{ height: 500 }} option={obj2} />
+      </Card>
+    </div>
+  );
+};
+
+export default BarPage;

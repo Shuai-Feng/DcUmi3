@@ -1,212 +1,141 @@
 import * as React from 'react';
 import { Card } from 'antd';
 
+import { EChartOption } from 'echarts/lib/echarts';
 import ReactEcharts from 'echarts-for-react';
-import { EChartOption } from 'echarts';
 
-export interface IAppProps {}
+import 'echarts/lib/chart/pie';
+import 'echarts/lib/component/tooltip';
+import 'echarts/lib/component/title';
+import 'echarts/lib/component/legend';
+import 'echarts/lib/component/markPoint';
 
-export interface IAppState {}
+interface IPiePageProps {}
 
-export default class App extends React.Component<IAppProps, IAppState> {
-  constructor(props: IAppProps) {
-    super(props);
-    this.state = {};
-  }
-  getOption3 = () => {
-    let option: EChartOption = {
-      title: {
-        text: '用户骑行订单',
+const PiePage: React.FunctionComponent<IPiePageProps> = props => {
+  let opt1: EChartOption = {
+    title: {
+      text: '饼图统计单车的行程',
+      // @ts-ignore
+      x: 'center',
+    },
+    legend: {
+      orient: 'horizontal',
+      bottom: 0,
+    },
+    series: [
+      {
+        name: '订单量',
+        type: 'pie',
+        radius: '80%',
+        data: [
+          {
+            value: 1000,
+            name: '周一',
+          },
+          {
+            value: 1000,
+            name: '周二',
+          },
+          {
+            value: 2000,
+            name: '周三',
+          },
+          {
+            value: 1500,
+            name: '周四',
+          },
+          {
+            value: 3000,
+            name: '周五',
+          },
+          {
+            value: 2000,
+            name: '周六',
+          },
+          {
+            value: 1200,
+            name: '周日',
+          },
+        ].sort((a, b) => {
+          return a.value - b.value;
+        }),
+        roseType: 'radius',
+        animationType: 'scale',
+        animationDelay: function(idx: any) {
+          return Math.random() * 200;
+        },
       },
-      tooltip: {
-        trigger: 'item',
-        formatter: '{a} <br/> {b}:{c}({d}%)',
-      },
-      series: [
-        {
-          type: 'pie',
-          data: [
-            {
-              value: 1000,
-              name: '周一',
-            },
-            {
-              value: 1000,
-              name: '周二',
-            },
-            {
-              value: 2000,
-              name: '周三',
-            },
-            {
-              value: 1500,
-              name: '周四',
-            },
-            {
-              value: 3000,
-              name: '周五',
-            },
-            {
-              value: 2000,
-              name: '周六',
-            },
-            {
-              value: 1200,
-              name: '周日',
-            },
-          ].sort(function(a, b) {
-            return a.value - b.value;
-          }),
-          roseType: 'radius',
-          animationType: 'scale',
-          animationEasing: 'elasticOut',
-          animationDelay: function(idx: any) {
-            return Math.random() * 400 + 1000 * idx;
+    ],
+  };
+  let opt2: EChartOption = {
+    title: {
+      text: '饼图统计单车的形成2',
+    },
+    tooltip: {
+      trigger: 'item',
+      formatter: '{a} <br/> {b}: {c}  ({d}%)',
+    },
+    legend: {
+      orient: 'vertical',
+      right: 10,
+    },
+    series: [
+      {
+        name: '订单量',
+        type: 'pie',
+        radius: '80%',
+        center: ['50%', '60%'],
+        data: [
+          {
+            value: 1000,
+            name: '周一',
+          },
+          {
+            value: 1000,
+            name: '周二',
+          },
+          {
+            value: 2000,
+            name: '周三',
+          },
+          {
+            value: 1500,
+            name: '周四',
+          },
+          {
+            value: 3000,
+            name: '周五',
+          },
+          {
+            value: 2000,
+            name: '周六',
+          },
+          {
+            value: 1200,
+            name: '周日',
+          },
+        ],
+        itemStyle: {
+          emphasis: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0,0,0,0.5)',
           },
         },
-      ],
-    };
-    return option;
+      },
+    ],
   };
-  getOption = () => {
-    let option: EChartOption = {
-      title: {
-        text: '用户骑行订单',
-        //@ts-ignore
-        x: 'center',
-      },
-      legend: {
-        orient: 'vertical',
-        left: 10,
-      },
-      tooltip: {
-        trigger: 'item',
-      },
-      series: [
-        {
-          name: '订单量',
-          type: 'pie',
-          radius: '70%',
-          center: ['80%', '60%'],
-          data: [
-            {
-              value: 1000,
-              name: '周一',
-            },
-            {
-              value: 1000,
-              name: '周二',
-            },
-            {
-              value: 1000,
-              name: '周三',
-            },
-            {
-              value: 1000,
-              name: '周四',
-            },
-            {
-              value: 1000,
-              name: '周五',
-            },
-            {
-              value: 1000,
-              name: '周六',
-            },
-            {
-              value: 1000,
-              name: '周日',
-            },
-          ],
-          itemStyle: {
-            emphasis: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: 'rgba(0,0,0,0.5)',
-            },
-          },
-        },
-      ],
-    };
-    return option;
-  };
-  getOption2 = () => {
-    let option: EChartOption = {
-      title: {
-        text: '用户骑行订单',
-        //@ts-ignore
-        x: 'center',
-      },
-      legend: {
-        orient: 'vertical',
-        left: 10,
-      },
-      tooltip: {
-        trigger: 'item',
-      },
-      series: [
-        {
-          name: '订单量',
-          type: 'pie',
-          radius: ['50%', '80%'],
-          center: ['80%', '60%'],
-          data: [
-            {
-              value: 1000,
-              name: '周一',
-            },
-            {
-              value: 1000,
-              name: '周二',
-            },
-            {
-              value: 1000,
-              name: '周三',
-            },
-            {
-              value: 1000,
-              name: '周四',
-            },
-            {
-              value: 1000,
-              name: '周五',
-            },
-            {
-              value: 1000,
-              name: '周六',
-            },
-            {
-              value: 1000,
-              name: '周日',
-            },
-          ].sort(function(a: any, b: any) {
-            return a.value - b.value;
-          }),
-          itemStyle: {
-            emphasis: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: 'rgba(0,0,0,0.5)',
-            },
-          },
-        },
-      ],
-    };
-    return option;
-  };
-  public render() {
-    return (
-      <div>
-        <Card title="饼图3">
-          <ReactEcharts option={this.getOption3()} />
-        </Card>
-        <Card title="饼图1">
-          <ReactEcharts option={this.getOption()} />
-        </Card>
-        <Card title="饼图2">
-          <ReactEcharts option={this.getOption2()} />
-        </Card>
-      </div>
-    );
-  }
-}
+  return (
+    <div className="PiePage">
+      <Card title="饼图之一">
+        <ReactEcharts style={{ height: 500 }} option={opt1} />
+      </Card>
+      <Card title="饼图之二">
+        <ReactEcharts style={{ height: 600 }} option={opt2} />
+      </Card>
+    </div>
+  );
+};
+
+export default PiePage;
