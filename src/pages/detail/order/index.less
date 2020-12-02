@@ -1,0 +1,43 @@
+@import '~@/style/mix.less';
+
+//地图的渲染
+.order-map {
+  .dbc_flex();
+  height: 450px;
+  border-bottom: 1px solid #ccc;
+}
+//信息列表的渲染
+.detail-items {
+  margin-left: 90px;
+  padding: 25px 50px 25px 0px;
+  border-bottom: 1px solid #ccc;
+  &:last-child {
+    border-bottom: none;
+  }
+  .item-title {
+    font-size: 24px;
+    color: #ccc;
+  }
+  .detail-form {
+    li {
+      margin: 20px 0;
+      line-height: 20px;
+      font-size: 15px;
+      .detail-form-left {
+        float: left;
+        width: 164px;
+        text-align: right;
+        color: #999;
+      }
+      .detail-form-content {
+        padding-left: 194px;
+      }
+      &::after {
+        content: ' ';
+        clear: both;
+        display: block;
+        visibility: hidden;
+      }
+    }
+  }
+}

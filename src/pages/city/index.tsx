@@ -1,127 +1,82 @@
-import * as React from 'react';
-import BaseForm from '@/components/BaseForm';
-import { Card, Button, Table, Modal, message } from 'antd';
-import Utils from '@/utils';
-import Axios from '@/axios';
+import React, { useEffect, useState } from 'react';
+import { Card, Table, Form, message, Button, Modal } from 'antd';
+//从antd 的 form 里 获取一下
+import SFaxios from '@/utils/axios';
+import FilterForm from './components/FilterForm';
+import OpenCityForm from './components/OpenForm';
+import SFevent from '@/utils/SFevent';
 
-export interface IAppProps {}
+import SFUtils from '@/utils/utils';
+export interface ICityPageProps {}
 
-export interface IAppState {
-  isShowOpenCity: boolean;
-  list: Array<any>;
+export interface ICityPageState {
+  modalVisibel: boolean;
+  listData: Array<any>;
 }
 
-class City extends React.Component<IAppProps, IAppState> {
+export default class CityPage extends React.Component<
+  ICityPageProps,
+  ICityPageState
+> {
   state = {
-    isShowOpenCity: false,
-    list: [],
+    modalVisibel: false,
+    listData: [],
+    page: 0,
   };
-  params = {
-    page: 1,
-  };
-  //用户存放city
-  cityForm: any;
 
-  formList = [
-    {
-      type: 'SELECT',
-      label: '城市',
-      field: 'city',
-      placeholder: '全部',
-      initialValue: '',
-      width: 80,
-      list: [
-        { id: '', name: '全部' },
-        { id: '1', name: '北京' },
-        { id: '2', name: '天津' },
-        { id: '3', name: '上海' },
-      ],
-    },
-    {
-      type: 'SELECT',
-      label: '用车模式',
-      field: 'mode',
-      placeholder: '全部',
-      initialValue: '',
-      width: 120,
-      list: [
-        { id: '', name: '全部' },
-        { id: '1', name: '指定停车点模式' },
-        { id: '2', name: '禁停区模式' },
-      ],
-    },
-    {
-      type: 'SELECT',
-      label: '营运模式',
-      field: 'op_mode',
-      placeholder: '全部',
-      initialValue: '',
-      width: 80,
-      list: [
-        { id: '', name: '全部' },
-        { id: '1', name: '自营' },
-        { id: '2', name: '加盟' },
-      ],
-    },
-    {
-      type: 'SELECT',
-      label: '加盟商授权状态',
-      field: 'auth_status',
-      placeholder: '全部',
-      initialValue: '',
-      width: 80,
-      list: [
-        { id: '', name: '全部' },
-        { id: '1', name: '已授权' },
-        { id: '2', name: '未授权' },
-      ],
-    },
-  ];
-  requestList = () => {
-    Axios.ajax({
+  //
+  filterForm: any;
+  //
+  Opencity: any;
+
+  requestList = async () => {
+    let { page } = this.state;
+    let resultData: any = await SFaxios.ajax({
       url: '/open_city',
-      data: {
-        params: {
-          page: this.params.page,
-        },
-      },
-    }).then((res: any) => {
-      let list = res.result.item_list.map((item: any, index: number) => {
+      data: { params: { page } },
+    });
+    if (resultData || resultData.code == 0) {
+      resultData.result.item_list.forEach((item: any, index: number) => {
         item.key = index;
-        return item;
       });
       this.setState({
-        list,
+        listData: resultData.result.item_list,
       });
-    });
+    } else {
+      message.info('出现了问题\n放心，不是你的问题');
+    }
   };
-  handleOpenCity = () => {
-    this.setState({
-      isShowOpenCity: true,
+
+  componentWillMount() {
+    SFevent.ee_on('getMyFilter', (myFilter: any) => {
+      this.filterForm = myFilter;
     });
-  };
-  handleSubmit = () => {
-    let cityInfo = this.cityForm.props.form.getFieldsValue();
-    Axios.ajax({
-      url: '/city/open',
-      data: {
-        params: cityInfo,
-      },
-    }).then((res: any) => {
-      if (res.code == '0') {
-        message.success('开通成功');
-        this.setState({
-          isShowOpenCity: false,
-        });
-        this.requestList();
-      }
+    SFevent.ee_on('getOpenCity', (myOpen: any) => {
+      this.Opencity = myOpen;
     });
-  };
+  }
+
   componentDidMount() {
     this.requestList();
   }
-  public render() {
-    let formList: any = this.formList;
+
+  handleOpenCitySubmit = async () => {
+    try {
+      await this.Opencity.validateFields();
+      let OpenCityData = this.Opencity.getFieldsValue();
+      SFaxios.ajax({ url: '/city/open', data: { params: OpenCityData } }).then(
+        res => {
+          this.setState({ modalVisibel: false });
+          this.requestList();
+          this.Opencity.resetFields();
+        },
+      );
+    } catch (error) {
+      message.warning('不对哦亲，表单好像有问题');
+    }
+  };
+  render() {
+    let { modalVisibel, listData } = this.state;
     const columns = [
       {
         title: '城市ID',
@@ -134,16 +89,6 @@ class City extends React.Component<IAppProps, IAppState> {
       {
         title: '用车模式',
         dataIndex: 'mode',
-        render(mode: any) {
-          return mode == 1 ? '停车点' : '禁停区';
-        },
-      },
-      {
-        title: '营运模式',
-        dataIndex: 'op_mode',
-        render(op_mode: any) {
-          return op_mode == 1 ? '自营' : '加盟';
-        },
       },
       {
         title: '授权加盟商',
@@ -167,7 +112,6 @@ class City extends React.Component<IAppProps, IAppState> {
       {
         title: '操作时间',
         dataIndex: 'update_time',
-        render: Utils.formateData,
       },
       {
         title: '操作人',
@@ -175,42 +119,162 @@ class City extends React.Component<IAppProps, IAppState> {
       },
     ];
     return (
-      <div>
-        <Card>
-          <BaseForm formList={formList} layout="inline" />
+      <div className="CityPage">
+        <Card style={{ marginBottom: 10 }}>
+          <FilterForm />
         </Card>
-        <Card style={{ marginTop: 10 }}>
-          <Button type="primary" onClick={this.handleOpenCity}>
+        <Card>
+          <Button
+            type="primary"
+            onClick={() => {
+              this.setState({ modalVisibel: true });
+            }}
+          >
             开通城市
           </Button>
         </Card>
-        <div className="content-wrap">
-          <Table
-            bordered
-            columns={columns}
-            dataSource={this.state.list}
-          ></Table>
-        </div>
+        <Card>
+          {/* <Input onBlur={handleRegTest}/> */}
+          <Table columns={columns} dataSource={listData} />
+        </Card>
         <Modal
-          title="开通城市"
-          visible={this.state.isShowOpenCity}
+          visible={modalVisibel}
           onCancel={() => {
-            this.setState({
-              isShowOpenCity: false,
-            });
+            this.setState({ modalVisibel: false });
           }}
-          onOk={this.handleSubmit}
+          title={'开通城市'}
+          onOk={this.handleOpenCitySubmit}
         >
-          <BaseForm
-            formList={formList}
-            wrappedComponentRef={(inst: any) => {
-              this.cityForm = inst;
-            }}
-          />
+          <OpenCityForm />
         </Modal>
       </div>
     );
   }
 }
 
-export default City;
+// interface ICityPageProps {}
+
+// const CityPage: React.FunctionComponent<ICityPageProps> = props => {
+//   let any: any;
+
+//   let [listData, setListData] = useState([]);
+//   let [modalVisibel, setVisibel] = useState(false);
+
+//   let [filterFormRef, setFilterForm] = useState(any);
+//   //城市开通窗口的实例
+//   let [openCityForm, setOpenCity] = useState(any);
+
+//   const page = useState(2);
+
+//   //定义表格的列
+//   const columns = [
+//     {
+//       title: '城市ID',
+//       dataIndex: 'id',
+//     },
+//     {
+//       title: '城市名称',
+//       dataIndex: 'name',
+//     },
+//     {
+//       title: '用车模式',
+//       dataIndex: 'mode',
+//     },
+//     {
+//       title: '授权加盟商',
+//       dataIndex: 'franchisee_name',
+//     },
+//     {
+//       title: '城市管理员',
+//       dataIndex: 'city_admins',
+//       render(arr: any) {
+//         return arr
+//           .map((item: any) => {
+//             return item.user_name;
+//           })
+//           .join(',');
+//       },
+//     },
+//     {
+//       title: '城市开通时间',
+//       dataIndex: 'open_time',
+//     },
+//     {
+//       title: '操作时间',
+//       dataIndex: 'update_time',
+//     },
+//     {
+//       title: '操作人',
+//       dataIndex: 'sys_user_name',
+//     },
+//   ];
+
+//   //请求数据
+//   let requestList = async () => {
+//     let resultData: any = await SFaxios.ajax({
+//       url: '/open_city',
+//       data: { params: { page } },
+//     });
+//     if (resultData || resultData.code == 0) {
+//       resultData.result.item_list.forEach((item: any, index: number) => {
+//         item.key = index;
+//       });
+//       setListData(resultData.result.item_list);
+//     } else {
+//       message.info('出现了问题\n放心，不是你的问题');
+//     }
+//   };
+
+//   //组件渲染完成后执行
+//   useEffect(() => {
+//     requestList();
+//     SFevent.ee_on('getOpenCity', (myFilter: any) => {
+//       setOpenCity(myFilter);
+//     });
+//     SFevent.ee_on('getMyFilter', (myOpen: any) => {
+//       setFilterForm(myOpen);
+//     });
+//   }, []);
+
+//   //开通城市
+//   let hanldeCitySubmit = () => {
+//     console.log(openCityForm.getFieldsValue());
+//   };
+
+//   return (
+//     <div className="CityPage">
+//       <Card style={{ marginBottom: 10 }}>
+//         <FilterForm />
+//       </Card>
+//       <Card>
+//         <Button onClick={() => {}}>查询</Button>
+//         <Button onClick={() => {}}>重置</Button>
+//       </Card>
+//       <Card>
+//         <Button
+//           type="primary"
+//           onClick={() => {
+//             setVisibel(true);
+//           }}
+//         >
+//           开通城市
+//         </Button>
+//       </Card>
+//       <Card>
+//         {/* <Input onBlur={handleRegTest}/> */}
+//         <Table columns={columns} dataSource={listData} />
+//       </Card>
+//       <Modal
+//         visible={modalVisibel}
+//         onCancel={() => {
+//           setVisibel(false);
+//         }}
+//         title={'开通城市'}
+//         onOk={hanldeCitySubmit}
+//       >
+//         <OpenCityForm />
+//       </Modal>
+//     </div>
+//   );
+// };
+// export default CityPage;

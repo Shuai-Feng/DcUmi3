@@ -1,45 +1,52 @@
 import * as React from 'react';
+import { IRouteComponentProps } from 'umi';
+
+import AjaxLoding from '@/component/AjaxLoding';
+import NavBar from '@/component/NavBar';
+import NavHeader from '@/component/NavHeader';
+
 import { Layout } from 'antd';
-//引入左侧导航栏
-import NavLeft from '@/components/NavLeft';
-//header组件
-import NavHeader from '@/components/Header';
+const { Sider, Content } = Layout;
 
-import '@/styles/common.less';
-import '@/styles/loading.less';
+import './glLayout.less';
 
-const { Content, Sider } = Layout;
+import '@/common/reset.css';
 
-interface IAppProps {}
-
-const App: React.FunctionComponent<IAppProps> = (props: any) => {
-  if (props.location.pathname.includes('/detail')) {
-    return <div>{props.children}</div>;
+const glLayout = (props: IRouteComponentProps) => {
+  if (props.location.pathname.includes(`/detail`)) {
+    return (
+      <div>
+        <AjaxLoding />
+        {props.children}
+      </div>
+    );
   }
-
   return (
-    <div>
+    <Layout className="gllayout">
+      <AjaxLoding />
+      <Sider
+        breakpoint="lg"
+        collapsedWidth={0}
+        className="sidebar"
+        width={200}
+        style={{ minHeight: '100vh' }}
+      >
+        <NavBar />
+      </Sider>
       <Layout>
-        <Sider breakpoint="lg" collapsedWidth={0} width={260}>
-          {/* 这里放menu组件 */}
-          <NavLeft className="navLeft"></NavLeft>
-        </Sider>
-
-        <Layout className="main">
-          <div className="header">
-            <NavHeader />
-          </div>
-          <Content style={{ margin: '24px 16px 0' }}>
-            {props.children}
-            <div className="footer">
-              created by
-              shuaifeng（推荐使用谷歌浏览器，可以获得更佳操作页面体验）
-            </div>
-          </Content>
-        </Layout>
+        <Content
+          className="main"
+          style={
+            document.documentElement.clientWidth < 500
+              ? { maxHeight: '100vh', minWidth: '100vw', overflowY: 'auto' }
+              : { maxHeight: '100vh', overflowY: 'auto' }
+          }
+        >
+          <NavHeader />
+          <div className="mainwrapper">{props.children}</div>
+        </Content>
       </Layout>
-    </div>
+    </Layout>
   );
 };
-
-export default App;
+export default glLayout;
